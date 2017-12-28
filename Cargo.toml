@@ -1,0 +1,6 @@
+[package]
+name = "N-puzzle"
+version = "0.1.0"
+authors = ["maxwell burson <maxwellburson@gmail.com>"]
+
+[dependencies]
