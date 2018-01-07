@@ -1,5 +1,5 @@
 [package]
-name = "N-puzzle"
+name = "n_puzzle"
 version = "0.1.0"
 authors = ["maxwell burson <maxwellburson@gmail.com>"]
 
