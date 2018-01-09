@@ -25,8 +25,39 @@ fn get_puzzle() -> Option<String> {
 }
 
 fn main() {
-    match get_puzzle() {
-        Some(file) => println!("file: {}", file),
+    let file = match get_puzzle() {
+        Some(file) => file,
         None => return
-    }
+    };
+
+    let mut lines = file.lines()
+        .filter(|&l| l.starts_with("#") == false)
+        .map(|l|
+            match l.find("#") {
+                Some(i) => &l[..i],
+                None => l
+            }
+        );
+
+    let size: usize = lines.next()
+        .expect("First line missing in puzzle")
+        .trim()
+        .parse()
+        .expect("Failed to parse puzzle size");
+
+    let puzzle: Vec<Vec<i32>> = lines.map(
+        |l| {
+            let line: Vec<i32> = l.split_whitespace()
+            .map(|n| n.parse().expect("Failed to parse puzzle value"))
+            .collect();
+            assert_eq!(line.len(), size);
+            line
+        }
+    ).collect();
+
+    assert_eq!(puzzle.len(), size);
+
+    println!("size: {}", size);
+
+    println!("lines: {:?}", puzzle);
 }
