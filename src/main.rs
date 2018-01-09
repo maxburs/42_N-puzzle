@@ -2,62 +2,37 @@ use std::env;
 use std::fs::File;
 use std::io::prelude::*;
 
-// type State = [[i32]];
+mod puzzle;
 
-
-fn get_puzzle() -> Option<String> {
+fn read_file() -> Result<String, String> {
     let file_name = match env::args().nth(1) {
         Some(file_name) => file_name,
-        None => {
-            println!("Please provide file name as program argument.");
-            return None;
-        }
+        None => return Err(String::from("Please provide file name as program argument."))
     };
     let mut file_contents = String::new();
     match File::open(& file_name) {
         Ok(mut file) => file.read_to_string(&mut file_contents).unwrap(),
-        Err(_) => {
-            println!("Failed to open {}", file_name);
-            return None;
-        }
+        Err(_) => return Err(format!("Failed to open {}", file_name))
     };
-    Some(file_contents)
+    Ok(file_contents)
 }
 
 fn main() {
-    let file = match get_puzzle() {
-        Some(file) => file,
-        None => return
+    let raw = match read_file() {
+        Ok(file) => file,
+        Err(e) => {
+            println!("{}",e);
+            return;
+        }
     };
 
-    let mut lines = file.lines()
-        .filter(|&l| l.starts_with("#") == false)
-        .map(|l|
-            match l.find("#") {
-                Some(i) => &l[..i],
-                None => l
-            }
-        );
-
-    let size: usize = lines.next()
-        .expect("First line missing in puzzle")
-        .trim()
-        .parse()
-        .expect("Failed to parse puzzle size");
-
-    let puzzle: Vec<Vec<i32>> = lines.map(
-        |l| {
-            let line: Vec<i32> = l.split_whitespace()
-            .map(|n| n.parse().expect("Failed to parse puzzle value"))
-            .collect();
-            assert_eq!(line.len(), size);
-            line
+    let puzzle = match puzzle::new(&raw) {
+        Ok(file) => file,
+        Err(e) => {
+            println!("{}",e);
+            return;
         }
-    ).collect();
-
-    assert_eq!(puzzle.len(), size);
-
-    println!("size: {}", size);
-
-    println!("lines: {:?}", puzzle);
+    };
+    
+    println!("lines: {}", puzzle);
 }
