@@ -3,6 +3,7 @@ use std::fmt;
 mod parse;
 mod solve;
 
+#[derive(Hash, Eq, PartialEq)]
 pub struct Puzzle {
     size: usize,
     content: Vec<Vec<i32>>,
@@ -24,7 +25,7 @@ pub fn new(raw: &str) -> Result<Puzzle, String> {
 }
 
 trait Solve {
-    fn solve(&self) -> Result<Solution, ()>;
+    fn solve(&self) -> Option<Solution>;
 }
 
 impl fmt::Display for Puzzle {
@@ -34,7 +35,9 @@ impl fmt::Display for Puzzle {
 }
 
 impl Solve for Puzzle {
-    fn solve(&self) -> Result<Solution, ()> {
+    fn solve(&self) -> Option<Solution> {
         solve::solve(self)
     }
 }
+
+

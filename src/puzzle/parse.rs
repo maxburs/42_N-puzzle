@@ -1,5 +1,7 @@
 use puzzle::Puzzle;
 
+// todo: check if puzzle has a valid combination of numbers
+
 pub fn parse_puzzle(raw: &str) -> Result<Puzzle, String> {
     let mut lines = raw.lines()
         .filter(|&l| l.starts_with("#") == false)
