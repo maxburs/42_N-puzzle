@@ -1,16 +1,21 @@
 use std::cmp::Eq;
 use std::cmp::PartialEq;
+use std::rc::Rc;
+use std::cell::RefCell;
 
 // todo: implement hash so it ignores x & y
 
-#[derive(Clone, Hash, Debug)]
+#[derive(Clone, Debug)]
 pub struct State {
     pub data: Vec<Vec<i32>>,
     x: usize,
     y: usize,
+    pub predecessor: Option<Rc<RefCell<State>>>,
+    pub distance: usize,
+    pub open: bool,
 }
 
-pub fn new(data: Vec<Vec<i32>>) -> State {
+pub fn new(data: Vec<Vec<i32>>, distance: usize) -> State {
     let mut coordinate: Option<(usize, usize)> = None;
 
     for (y, row) in data.iter().enumerate() {
@@ -22,14 +27,18 @@ pub fn new(data: Vec<Vec<i32>>) -> State {
     }
 
     if let Some((x, y)) = coordinate {
-        return State { data, x, y };
+        return State {
+            data, x, y, distance,
+            predecessor: None,
+            open: true,
+        };
     }
 
     panic!("Failed to find empty space in puzzle");
 }
 
 impl State {
-    fn swap(&self, x: usize, y: usize) -> State {
+    fn move_space(&self, x: usize, y: usize) -> State {
         let mut data = self.data.clone();
 
         let swap = data[y][x];
@@ -37,9 +46,10 @@ impl State {
         data[self.y][self.x] = swap;
 
         State {
-            data: data,
-            x: x,
-            y: y,
+            data, x, y,
+            predecessor: None,
+            distance: self.distance,
+            open: true,
         }
     }
     pub fn expand(&self) -> Vec<State> {
@@ -62,7 +72,7 @@ impl State {
             moves.push(((self.x, self.y + 1)));
         }
         moves.iter()
-            .map(|m| self.swap(m.0, m.1))
+            .map(|m| self.move_space(m.0, m.1))
             .collect()
     }
 }

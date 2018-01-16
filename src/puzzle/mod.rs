@@ -6,7 +6,7 @@ mod state;
 
 pub struct Puzzle {
     size: usize,
-    state: state::State,
+    data: Vec<Vec<i32>>,
 }
 
 pub struct Solution {
@@ -26,7 +26,7 @@ pub fn new(raw: &str) -> Result<Puzzle, String> {
 
 impl fmt::Display for Puzzle {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-       write!(f, "{:?}", self.state.data)
+       write!(f, "{:?}", self.data)
     }
 }
 

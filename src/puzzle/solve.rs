@@ -3,8 +3,9 @@ use puzzle::Solution;
 use puzzle::state;
 use std::collections::HashMap;
 use std::rc::Rc;
+use std::cell::RefCell;
 
-fn generate_final_state(size: usize) -> state::State {
+fn generate_final_data(size: usize) -> Vec<Vec<i32>> {
     let mut left = 0;
     let mut top = 0;
     let mut right = size - 1;
@@ -43,7 +44,7 @@ fn generate_final_state(size: usize) -> state::State {
 
     puz[top][left] = 0;
 
-    state::new(puz)
+    puz
 }
 
 #[test]
@@ -79,28 +80,33 @@ fn validate_puzzle_gen() {
 
 pub fn solve(puzzle: &Puzzle) -> Option<Solution> {
     // todo: use unsafe code instead of reference counting
-    let start = Rc::new(puzzle.state.clone());
+    let start = Rc::new(RefCell::new(state::new(puzzle.data.clone(), 0)));
 
     // open_rank stores the open states sorted by ranking
     let mut open_rank = Vec::new();
     let mut states = HashMap::new();
-    let final_state = generate_final_state(puzzle.size);
+    let final_state = generate_final_data(puzzle.size);
 
     let mut complexity_time = 0;
 
     open_rank.push(Rc::clone(&start));
-    states.insert(Rc::clone(&start), true);
+    // todo: Duplicating data here. Need to remove this somehow.
+
+    let key = start.borrow().data.clone();
+    states.insert(key, start);
 
     loop {
         complexity_time += 1;
 
-        let e = if let Some(state) = open_rank.pop() {
+        let e_cell = if let Some(state) = open_rank.pop() {
             state
         } else {
             return None;
         };
 
-        if *e == final_state {
+        let e = e_cell.borrow();
+
+        if (*e).data == final_state {
             return Some(Solution {
                 complexity_time,
                 complexity_space: states.len(),
@@ -108,15 +114,26 @@ pub fn solve(puzzle: &Puzzle) -> Option<Solution> {
             });
         };
 
-        for s in (*e).expand() {
-            if states.contains_key(&s) {
-                let s = Rc::new(s);
+        for mut s in (*e).expand() {
+            // Two if statements so I can mutate states in else.
+            if ( if let Some(mut s_cell) = states.get(&s.data) {
+                let mut s = s_cell.borrow();
+                if s.distance > (*e).distance + 1 {
+                    (*s).distance = (*e).distance + 1;
+                    (*s).predecessor = Some(Rc::clone(&e_cell));
+                    if (*s).open == false {
+                        (*s).open = true;
+                        open_rank.push(Rc::clone(&s_cell));
+                    }
+                }
+                true
+            } else { false }) == false {
+                s.predecessor = Some(Rc::clone(&e_cell));
+                let s = Rc::new(RefCell::new(s));
                 open_rank.push(Rc::clone(&s));
-                states.insert(s, true);
-            } else {
-
+                let key = s.borrow().data.clone();
+                states.insert(key, s);
             }
         }
-
     }
 }

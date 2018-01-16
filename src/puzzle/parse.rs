@@ -1,5 +1,4 @@
 use puzzle::Puzzle;
-use puzzle::state;
 
 // todo: check if puzzle has a valid combination of numbers
 
@@ -68,6 +67,6 @@ pub fn parse_puzzle(raw: &str) -> Result<Puzzle, String> {
 
     Ok(Puzzle {
         size: size,
-        state: state::new(puzzle),
+        data: puzzle,
     })
 }
