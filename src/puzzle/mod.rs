@@ -2,11 +2,11 @@ use std::fmt;
 
 mod parse;
 mod solve;
+mod state;
 
-#[derive(Hash, Eq, PartialEq)]
 pub struct Puzzle {
     size: usize,
-    content: Vec<Vec<i32>>,
+    state: state::State,
 }
 
 pub struct Solution {
@@ -30,13 +30,13 @@ trait Solve {
 
 impl fmt::Display for Puzzle {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-       write!(f, "{:?}", self.content)
+       write!(f, "{:?}", self.state.data)
     }
 }
 
 impl Solve for Puzzle {
     fn solve(&self) -> Option<Solution> {
-        solve::solve(self)
+        solve::solve(&self)
     }
 }
 
