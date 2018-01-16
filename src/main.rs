@@ -33,6 +33,16 @@ fn main() {
             return;
         }
     };
-    
+
     println!("lines: {}", puzzle);
+
+    let solution = if let Some(solution) = puzzle.solve() {
+        solution
+    } else {
+        println!("No solution found");
+        return;
+    };
+    
+    println!("Space complexity: {}", solution.complexity_space);
+    println!("Time Complexity:  {}", solution.complexity_time);
 }

@@ -42,7 +42,7 @@ impl State {
             y: y,
         }
     }
-    fn expand(&self) -> Vec<State> {
+    pub fn expand(&self) -> Vec<State> {
         let size = self.data.len();
 
         // todo: numbers wont go below zero and get culled

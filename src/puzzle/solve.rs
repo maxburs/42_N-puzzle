@@ -86,10 +86,14 @@ pub fn solve(puzzle: &Puzzle) -> Option<Solution> {
     let mut states = HashMap::new();
     let final_state = generate_final_state(puzzle.size);
 
+    let mut complexity_time = 0;
+
     open_rank.push(Rc::clone(&start));
     states.insert(Rc::clone(&start), true);
 
     loop {
+        complexity_time += 1;
+
         let e = if let Some(state) = open_rank.pop() {
             state
         } else {
@@ -98,11 +102,21 @@ pub fn solve(puzzle: &Puzzle) -> Option<Solution> {
 
         if *e == final_state {
             return Some(Solution {
-                complexity_time: 0,
-                complexity_space: 0,
+                complexity_time,
+                complexity_space: states.len(),
                 moves: ()
             });
         };
+
+        for s in (*e).expand() {
+            if states.contains_key(&s) {
+                let s = Rc::new(s);
+                open_rank.push(Rc::clone(&s));
+                states.insert(s, true);
+            } else {
+
+            }
+        }
 
     }
 }

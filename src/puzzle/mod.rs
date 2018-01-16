@@ -11,21 +11,17 @@ pub struct Puzzle {
 
 pub struct Solution {
     // Total number of states ever selected in the "opened" set (complexity in time).
-    complexity_time: u32,
+    pub complexity_time: usize,
     // Maximum number of states ever represented in memory at the same time
     // during the search (complexity in size)
-    complexity_space: u32,
+    pub complexity_space: usize,
     // Number of moves required to transition from the initial state to the final state,
     // according to the search.
-    moves: (), // unimplemented
+    pub moves: (), // unimplemented
 }
    
 pub fn new(raw: &str) -> Result<Puzzle, String> {
     parse::parse_puzzle(raw)
-}
-
-trait Solve {
-    fn solve(&self) -> Option<Solution>;
 }
 
 impl fmt::Display for Puzzle {
@@ -34,8 +30,8 @@ impl fmt::Display for Puzzle {
     }
 }
 
-impl Solve for Puzzle {
-    fn solve(&self) -> Option<Solution> {
+impl Puzzle {
+    pub fn solve(&self) -> Option<Solution> {
         solve::solve(&self)
     }
 }
