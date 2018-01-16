@@ -49,7 +49,7 @@ fn generate_final_state(size: usize) -> state::State {
 #[test]
 fn validate_puzzle_gen() {
     assert_eq!(
-        generate_final_state(3),
+        generate_final_state(3).data,
         [
             [1, 2, 3],
             [8, 0, 4],
@@ -57,7 +57,7 @@ fn validate_puzzle_gen() {
         ]
     );
     assert_eq!(
-        generate_final_state(4),
+        generate_final_state(4).data,
         [
             [ 1,  2,  3,  4],
             [12, 13, 14,  5],
@@ -66,7 +66,7 @@ fn validate_puzzle_gen() {
         ]
     );
     assert_eq!(
-        generate_final_state(5),
+        generate_final_state(5).data,
         [
             [ 1,  2,  3,  4, 5],
             [16, 17, 18, 19, 6],
