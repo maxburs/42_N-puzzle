@@ -50,7 +50,7 @@ fn generate_final_data(size: usize) -> Vec<Vec<i32>> {
 #[test]
 fn validate_puzzle_gen() {
     assert_eq!(
-        generate_final_state(3).data,
+        generate_final_data(3),
         [
             [1, 2, 3],
             [8, 0, 4],
@@ -58,7 +58,7 @@ fn validate_puzzle_gen() {
         ]
     );
     assert_eq!(
-        generate_final_state(4).data,
+        generate_final_data(4),
         [
             [ 1,  2,  3,  4],
             [12, 13, 14,  5],
@@ -67,7 +67,7 @@ fn validate_puzzle_gen() {
         ]
     );
     assert_eq!(
-        generate_final_state(5).data,
+        generate_final_data(5),
         [
             [ 1,  2,  3,  4, 5],
             [16, 17, 18, 19, 6],
@@ -86,6 +86,8 @@ pub fn solve(puzzle: &Puzzle) -> Option<Solution> {
     let mut open_rank = Vec::new();
     let mut states = HashMap::new();
     let final_state = generate_final_data(puzzle.size);
+
+    println!("target state: {:?}", final_state);
 
     let mut complexity_time = 0;
 
@@ -106,7 +108,8 @@ pub fn solve(puzzle: &Puzzle) -> Option<Solution> {
 
         let e = e_cell.borrow();
 
-        if (*e).data == final_state {
+        if e.data == final_state {
+            println!("finished!");
             return Some(Solution {
                 complexity_time,
                 complexity_space: states.len(),
@@ -114,20 +117,22 @@ pub fn solve(puzzle: &Puzzle) -> Option<Solution> {
             });
         };
 
-        for mut s in (*e).expand() {
+        for mut s in e.expand() {
             // Two if statements so I can mutate states in else.
             if ( if let Some(mut s_cell) = states.get(&s.data) {
-                let mut s = s_cell.borrow();
-                if s.distance > (*e).distance + 1 {
-                    (*s).distance = (*e).distance + 1;
-                    (*s).predecessor = Some(Rc::clone(&e_cell));
-                    if (*s).open == false {
-                        (*s).open = true;
+                let mut s = s_cell.borrow_mut();
+                if s.distance > e.distance + 1 {
+                    s.distance = e.distance + 1;
+                    s.predecessor = Some(Rc::clone(&e_cell));
+                    if s.open == false {
+                        s.open = true;
                         open_rank.push(Rc::clone(&s_cell));
                     }
                 }
                 true
             } else { false }) == false {
+                print!("new state:\n{}", s);
+
                 s.predecessor = Some(Rc::clone(&e_cell));
                 let s = Rc::new(RefCell::new(s));
                 open_rank.push(Rc::clone(&s));
@@ -135,5 +140,6 @@ pub fn solve(puzzle: &Puzzle) -> Option<Solution> {
                 states.insert(key, s);
             }
         }
+        println!("Remaining states: {}", states.len());
     }
 }

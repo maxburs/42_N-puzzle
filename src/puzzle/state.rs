@@ -2,8 +2,7 @@ use std::cmp::Eq;
 use std::cmp::PartialEq;
 use std::rc::Rc;
 use std::cell::RefCell;
-
-// todo: implement hash so it ignores x & y
+use std::fmt;
 
 #[derive(Clone, Debug)]
 pub struct State {
@@ -85,8 +84,34 @@ impl PartialEq for State {
     }
 }
 
+impl fmt::Display for State {
+    fn fmt(&self, f: & mut fmt::Formatter) -> fmt::Result {
+        for line in self.data.iter() {
+            for n in line.iter() {
+                write!(f, "{} ", n)?;
+            }
+            write!(f, "\n")?;
+        };
+        Ok(())
+    }
+}
+
 #[test]
 fn test_expand() {
+    let base = Rc::new(RefCell::new(
+        State {
+            data: vec![
+                vec![1, 0],
+                vec![1, 1],
+            ],
+            x: 1,
+            y: 0,
+            distance: 0,
+            open: false,
+            predecessor: None
+        }
+    ));
+
     assert_eq!(
         vec![
             State {
@@ -96,6 +121,9 @@ fn test_expand() {
                 ],
                 x: 0,
                 y: 0,
+                distance: 1,
+                open: true,
+                predecessor: Some(Rc::clone(&base)),
             },
             State {
                 data: vec![
@@ -104,15 +132,11 @@ fn test_expand() {
                 ],
                 x: 1,
                 y: 1,
+                distance: 1,
+                open: true,
+                predecessor: Some(Rc::clone(&base)),
             }
         ],
-        State {
-            data: vec![
-                vec![1, 0],
-                vec![1, 1],
-            ],
-            x: 1,
-            y: 0,
-        }.expand()
+        base.borrow().expand()
     );
 }
