@@ -110,6 +110,13 @@ pub fn solve(puzzle: &Puzzle) -> Option<Solution> {
 
         if e.data == final_state {
             println!("finished!");
+
+            for state in states.values() {
+                if state.borrow().data != e.data {
+                    state.borrow_mut().predecessor = None;
+                }
+            }
+
             return Some(Solution {
                 complexity_time,
                 complexity_space: states.len(),
@@ -131,7 +138,7 @@ pub fn solve(puzzle: &Puzzle) -> Option<Solution> {
                 }
                 true
             } else { false }) == false {
-                print!("new state:\n{}", s);
+                // print!("new state:\n{}", s);
 
                 s.predecessor = Some(Rc::clone(&e_cell));
                 let s = Rc::new(RefCell::new(s));
@@ -140,6 +147,6 @@ pub fn solve(puzzle: &Puzzle) -> Option<Solution> {
                 states.insert(key, s);
             }
         }
-        println!("Remaining states: {}", states.len());
+        // println!("Remaining states: {}", states.len());
     }
 }
