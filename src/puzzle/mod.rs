@@ -6,7 +6,7 @@ mod state;
 
 pub struct Puzzle {
     size: usize,
-    data: Vec<Vec<i32>>,
+    data: Vec<Vec<u32>>,
 }
 
 pub struct Solution {
@@ -17,7 +17,8 @@ pub struct Solution {
     pub complexity_space: usize,
     // Number of moves required to transition from the initial state to the final state,
     // according to the search.
-    pub moves: (), // unimplemented
+    pub sequence_of_states: Vec<Vec<Vec<u32>>>, // unimplemented
+    pub number_of_moves_required: usize,
 }
    
 pub fn new(raw: &str) -> Result<Puzzle, String> {

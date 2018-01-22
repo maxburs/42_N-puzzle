@@ -2,7 +2,7 @@ use puzzle::Puzzle;
 
 // todo: check if puzzle has a valid combination of numbers
 
-fn validate(puzzle: &Vec<Vec<i32>>, size: usize) -> Result<(), String> {
+fn validate(puzzle: &Vec<Vec<u32>>, size: usize) -> Result<(), String> {
     let mut found = vec![false; size * size];
 
     // Validate puzzle height.
@@ -52,11 +52,11 @@ pub fn parse_puzzle(raw: &str) -> Result<Puzzle, String> {
         .parse()
         .expect("Failed to parse puzzle size");
 
-    let puzzle: Vec<Vec<i32>> = lines
+    let puzzle: Vec<Vec<u32>> = lines
         .map(|l: &str| {
             l.split_whitespace()
                 .map(|n| n
-                    .parse::<i32>()
+                    .parse::<u32>()
                     .expect("Failed to parse puzzle value")
                 )
                 .collect()

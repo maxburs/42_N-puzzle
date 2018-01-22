@@ -1,20 +1,18 @@
-use std::cmp::Eq;
-use std::cmp::PartialEq;
 use std::rc::Rc;
 use std::cell::RefCell;
 use std::fmt;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct State {
-    pub data: Vec<Vec<i32>>,
+    pub data: Vec<Vec<u32>>,
     x: usize,
     y: usize,
-    pub predecessor: Option<Rc<RefCell<State>>>,
+    pub previous: Option<Rc<RefCell<State>>>,
     pub distance: usize,
     pub open: bool,
 }
 
-pub fn new(data: Vec<Vec<i32>>, distance: usize) -> State {
+pub fn new(data: Vec<Vec<u32>>, distance: usize) -> State {
     let mut coordinate: Option<(usize, usize)> = None;
 
     for (y, row) in data.iter().enumerate() {
@@ -28,7 +26,7 @@ pub fn new(data: Vec<Vec<i32>>, distance: usize) -> State {
     if let Some((x, y)) = coordinate {
         return State {
             data, x, y, distance,
-            predecessor: None,
+            previous: None,
             open: true,
         };
     }
@@ -46,8 +44,8 @@ impl State {
 
         State {
             data, x, y,
-            predecessor: None,
-            distance: self.distance,
+            previous: None,
+            distance: self.distance + 1,
             open: true,
         }
     }
@@ -76,14 +74,6 @@ impl State {
     }
 }
 
-impl Eq for State {}
-
-impl PartialEq for State {
-    fn eq(&self, other: &State) -> bool {
-        self.data == other.data
-    }
-}
-
 impl fmt::Display for State {
     fn fmt(&self, f: & mut fmt::Formatter) -> fmt::Result {
         for line in self.data.iter() {
@@ -108,7 +98,7 @@ fn test_expand() {
             y: 0,
             distance: 0,
             open: false,
-            predecessor: None
+            previous: None
         }
     ));
 
@@ -123,7 +113,7 @@ fn test_expand() {
                 y: 0,
                 distance: 1,
                 open: true,
-                predecessor: Some(Rc::clone(&base)),
+                previous: None,
             },
             State {
                 data: vec![
@@ -134,7 +124,7 @@ fn test_expand() {
                 y: 1,
                 distance: 1,
                 open: true,
-                predecessor: Some(Rc::clone(&base)),
+                previous: None,
             }
         ],
         base.borrow().expand()

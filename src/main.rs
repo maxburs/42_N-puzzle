@@ -17,16 +17,6 @@ fn read_file() -> Result<String, String> {
     Ok(file_contents)
 }
 
-#[test]
-fn overflow() {
-    let mut raw = String::new();
-    File::open("./resources/puzzles/example_1.txt").expect("test").read_to_string(& mut raw).expect("test");
-
-    let puzzle = puzzle::new(&raw).expect("test");
-
-    let solution = puzzle.solve().expect("test");
-}
-
 fn main() {
     let raw = match read_file() {
         Ok(file) => file,
@@ -55,4 +45,5 @@ fn main() {
     
     println!("Space complexity: {}", solution.complexity_space);
     println!("Time Complexity:  {}", solution.complexity_time);
+    println!("Number of moves required: {}", solution.number_of_moves_required);
 }

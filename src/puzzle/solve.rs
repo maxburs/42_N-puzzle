@@ -1,11 +1,13 @@
-use puzzle::Puzzle;
-use puzzle::Solution;
-use puzzle::state;
 use std::collections::HashMap;
 use std::rc::Rc;
 use std::cell::RefCell;
+use std::mem;
 
-fn generate_final_data(size: usize) -> Vec<Vec<i32>> {
+use puzzle::Puzzle;
+use puzzle::Solution;
+use puzzle::state;
+
+fn generate_final_data(size: usize) -> Vec<Vec<u32>> {
     let mut left = 0;
     let mut top = 0;
     let mut right = size - 1;
@@ -92,7 +94,7 @@ pub fn solve(puzzle: &Puzzle) -> Option<Solution> {
     let mut complexity_time = 0;
 
     open_rank.push(Rc::clone(&start));
-    // todo: Duplicating data here. Need to remove this somehow.
+    // todo: Duplicating data here.
 
     let key = start.borrow().data.clone();
     states.insert(key, start);
@@ -109,18 +111,36 @@ pub fn solve(puzzle: &Puzzle) -> Option<Solution> {
         let e = e_cell.borrow();
 
         if e.data == final_state {
-            println!("finished!");
+            let sequence_of_states: Vec<Vec<Vec<u32>>> = {
+
+                let mut sequence_of_states = vec![];
+                sequence_of_states.push(e.data.clone());
+                let mut state = mem::replace(&mut e_cell.borrow_mut().previous, None);
+                loop {
+                    state = match state {
+                        Some(s) => {
+                            let mut s = s.borrow_mut();
+                            sequence_of_states.push(s.data.clone());
+                            mem::replace(&mut s.previous, None)
+                        },
+                        None => break,
+                }
+                    }
+                let sequence_of_states = sequence_of_states.drain(..).rev().collect();
+                sequence_of_states
+            };
 
             for state in states.values() {
                 if state.borrow().data != e.data {
-                    state.borrow_mut().predecessor = None;
+                    state.borrow_mut().previous = None;
                 }
             }
 
             return Some(Solution {
                 complexity_time,
                 complexity_space: states.len(),
-                moves: ()
+                sequence_of_states,
+                number_of_moves_required: e.distance,
             });
         };
 
@@ -130,7 +150,7 @@ pub fn solve(puzzle: &Puzzle) -> Option<Solution> {
                 let mut s = s_cell.borrow_mut();
                 if s.distance > e.distance + 1 {
                     s.distance = e.distance + 1;
-                    s.predecessor = Some(Rc::clone(&e_cell));
+                    s.previous = Some(Rc::clone(&e_cell));
                     if s.open == false {
                         s.open = true;
                         open_rank.push(Rc::clone(&s_cell));
@@ -138,15 +158,13 @@ pub fn solve(puzzle: &Puzzle) -> Option<Solution> {
                 }
                 true
             } else { false }) == false {
-                // print!("new state:\n{}", s);
 
-                s.predecessor = Some(Rc::clone(&e_cell));
+                s.previous = Some(Rc::clone(&e_cell));
                 let s = Rc::new(RefCell::new(s));
                 open_rank.push(Rc::clone(&s));
                 let key = s.borrow().data.clone();
                 states.insert(key, s);
             }
         }
-        // println!("Remaining states: {}", states.len());
     }
 }
