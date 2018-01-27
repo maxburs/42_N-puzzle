@@ -20,11 +20,11 @@ pub fn new<T: Expandable>(data: T, distance: usize) -> State<T> {
     }
 }
 
-impl Expandable<T> for State<T> {
-    fn expand(self) -> Vec<Self> {
+impl<T: Expandable> Expandable for State<T> {
+    fn expand(&self) -> Vec<Self> {
         self.data
             .expand()
-            .iter()
+            .into_iter()
             .map(|data|
                 State {
                     data,
