@@ -1,28 +1,18 @@
 use std::fmt;
 
 mod parse;
-mod solve;
-mod state;
+mod generate_final;
+
+pub use self::parse::from_raw;
 
 pub struct Puzzle {
-    size: usize,
     data: Vec<Vec<u32>>,
+    x: usize,
+    y: usize,
 }
 
-pub struct Solution {
-    // Total number of states ever selected in the "opened" set (complexity in time).
-    pub complexity_time: usize,
-    // Maximum number of states ever represented in memory at the same time
-    // during the search (complexity in size)
-    pub complexity_space: usize,
-    // Number of moves required to transition from the initial state to the final state,
-    // according to the search.
-    pub sequence_of_states: Vec<Vec<Vec<u32>>>, // unimplemented
-    pub number_of_moves_required: usize,
-}
-   
-pub fn new(raw: &str) -> Result<Puzzle, String> {
-    parse::parse_puzzle(raw)
+pub fn target_of_size(size: usize) -> Result<Puzzle, String> {
+    parse::from_data(generate_final::generate_final(size))
 }
 
 impl fmt::Display for Puzzle {
@@ -31,9 +21,38 @@ impl fmt::Display for Puzzle {
     }
 }
 
+impl super::a_star::Expandable for Puzzle {
+    fn expand(&self) -> Vec<Self> {
+        let size = self.data.len();
+        let mut moves = Vec::new();
+
+        if self.x > 0 {
+            moves.push((self.x - 1, self.y));
+        }
+        if self.x  + 1 < size {
+            moves.push((self.x + 1, self.y));
+        }
+        if self.y > 0 {
+            moves.push(((self.x, self.y - 1)));
+        }
+        if self.y + 1 < size {
+            moves.push(((self.x, self.y + 1)));
+        }
+        moves.iter()
+            .map(|m| self.move_space(m.0, m.1))
+            .collect()
+    }
+}
+
 impl Puzzle {
-    pub fn solve(&self) -> Option<Solution> {
-        solve::solve(&self)
+    fn move_space(&self, x: usize, y: usize) -> Puzzle {
+        let mut data = self.data.clone();
+
+        let swap = data[y][x];
+        data[y][x] = data[self.y][self.x];
+        data[self.y][self.x] = swap;
+
+        Puzzle { data, x, y, }
     }
 }
 

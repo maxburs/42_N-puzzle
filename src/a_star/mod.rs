@@ -2,94 +2,33 @@ use std::collections::HashMap;
 use std::rc::Rc;
 use std::cell::RefCell;
 use std::mem;
+use std::marker;
 
-use puzzle::Puzzle;
-use puzzle::Solution;
-use puzzle::state;
+mod state;
 
-fn generate_final_data(size: usize) -> Vec<Vec<u32>> {
-    let mut left = 0;
-    let mut top = 0;
-    let mut right = size - 1;
-    let mut bottom = size - 1;
-
-    let mut puz = vec![vec![0; size]; size];
-
-    let mut counter = 1;
-
-    loop {
-        for x in left..(right + 1) {
-            puz[top][x] = counter;
-            counter += 1;
-        }
-        if top == bottom { break; }
-        top += 1;
-        for y in top..(bottom + 1) {
-            puz[y][right] = counter;
-            counter += 1;
-        }
-        if right == left { break; }
-        right -= 1;
-        for x in (left..(right + 1)).rev() {
-            puz[bottom][x] = counter;
-            counter += 1;
-        }
-        if top == bottom { break; }
-        bottom -= 1;
-        for y in (top..(bottom + 1)).rev() {
-            puz[y][left] = counter;
-            counter += 1;
-        }
-        if right == left { break; }
-        left += 1;
-    }
-
-    puz[top][left] = 0;
-
-    puz
+pub trait Expandable: marker::Sized {
+    fn expand(&self) -> Vec<Self>;
 }
 
-#[test]
-fn validate_puzzle_gen() {
-    assert_eq!(
-        generate_final_data(3),
-        [
-            [1, 2, 3],
-            [8, 0, 4],
-            [7, 6, 5]
-        ]
-    );
-    assert_eq!(
-        generate_final_data(4),
-        [
-            [ 1,  2,  3,  4],
-            [12, 13, 14,  5],
-            [11,  0, 15,  6],
-            [10,  9,  8,  7]
-        ]
-    );
-    assert_eq!(
-        generate_final_data(5),
-        [
-            [ 1,  2,  3,  4, 5],
-            [16, 17, 18, 19, 6],
-            [15, 24,  0, 20, 7],
-            [14, 23, 22, 21, 8],
-            [13, 12, 11, 10, 9]
-        ]
-    );
+pub struct Solution<T: Expandable> {
+    // Total number of states ever selected in the "opened" set (complexity in time).
+    pub complexity_time: usize,
+    // Maximum number of states ever represented in memory at the same time
+    // during the search (complexity in size)
+    pub complexity_space: usize,
+    // Number of moves required to transition from the initial state to the final state,
+    // according to the search.
+    pub sequence_of_states: Vec<T>, // unimplemented
+    pub number_of_moves_required: usize,
 }
 
-pub fn solve(puzzle: &Puzzle) -> Option<Solution> {
+pub fn solve<T: Expandable>(puzzle: &T, target: &T) -> Option<Solution<T>> {
     // todo: use unsafe code instead of reference counting
     let start = Rc::new(RefCell::new(state::new(puzzle.data.clone(), 0)));
 
     // open_rank stores the open states sorted by ranking
     let mut open_rank = Vec::new();
     let mut states = HashMap::new();
-    let final_state = generate_final_data(puzzle.size);
-
-    println!("target state: {:?}", final_state);
 
     let mut complexity_time = 0;
 
@@ -110,8 +49,8 @@ pub fn solve(puzzle: &Puzzle) -> Option<Solution> {
 
         let e = e_cell.borrow();
 
-        if e.data == final_state {
-            let sequence_of_states: Vec<Vec<Vec<u32>>> = {
+        if e.data == target {
+            let sequence_of_states: Vec<T> = {
 
                 let mut sequence_of_states = vec![];
                 sequence_of_states.push(e.data.clone());

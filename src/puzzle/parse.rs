@@ -37,7 +37,25 @@ fn validate(puzzle: &Vec<Vec<u32>>, size: usize) -> Result<(), String> {
     Ok(())
 }
 
-pub fn parse_puzzle(raw: &str) -> Result<Puzzle, String> {
+fn find_center(data: &Vec<Vec<u32>>) -> Result<(usize, usize), String> {
+
+    let mut coordinate: Option<(usize, usize)> = None;
+
+    for (y, row) in data.iter().enumerate() {
+        for (x, value) in row.iter().enumerate() {
+            if *value == 0 {
+                coordinate = Some((x, y));
+            }
+        }
+    }
+
+    match coordinate {
+        Some(c) => Ok(c),
+        None => Err(String::from("Failed to find empty space in puzzle"))
+    }
+}
+
+pub fn from_raw(raw: &str) -> Result<Puzzle, String> {
     let mut lines = raw.lines()
         .filter(|&l| l.starts_with("#") == false)
         .map(|l| match l.find("#") {
@@ -52,7 +70,7 @@ pub fn parse_puzzle(raw: &str) -> Result<Puzzle, String> {
         .parse()
         .expect("Failed to parse puzzle size");
 
-    let puzzle: Vec<Vec<u32>> = lines
+    let data: Vec<Vec<u32>> = lines
         .map(|l: &str| {
             l.split_whitespace()
                 .map(|n| n
@@ -62,11 +80,14 @@ pub fn parse_puzzle(raw: &str) -> Result<Puzzle, String> {
                 .collect()
         })
         .collect();
+    
+    return from_data(data);
+}
 
-    validate(&puzzle, size)?;
+pub fn from_data(data: Vec<Vec<u32>>) -> Result<Puzzle, String> {
+    validate(&data, data.len())?;
 
-    Ok(Puzzle {
-        size: size,
-        data: puzzle,
-    })
+    let (x, y) = find_center(&data)?;
+
+    Ok(Puzzle { x, y, data, })
 }

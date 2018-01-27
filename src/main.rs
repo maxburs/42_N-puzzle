@@ -3,6 +3,7 @@ use std::fs::File;
 use std::io::prelude::*;
 
 mod puzzle;
+mod a_star;
 
 fn read_file() -> Result<String, String> {
     let file_name = match env::args().nth(1) {
@@ -26,7 +27,7 @@ fn main() {
         }
     };
 
-    let puzzle = match puzzle::new(&raw) {
+    let puzzle = match puzzle::from_raw(&raw) {
         Ok(file) => file,
         Err(e) => {
             println!("{}",e);
@@ -36,14 +37,14 @@ fn main() {
 
     println!("lines: {}", puzzle);
 
-    let solution = if let Some(solution) = puzzle.solve() {
-        solution
-    } else {
-        println!("No solution found");
-        return;
-    };
+    // let solution = if let Some(solution) = puzzle.solve() {
+    //     solution
+    // } else {
+    //     println!("No solution found");
+    //     return;
+    // };
     
-    println!("Space complexity: {}", solution.complexity_space);
-    println!("Time Complexity:  {}", solution.complexity_time);
-    println!("Number of moves required: {}", solution.number_of_moves_required);
+    // println!("Space complexity: {}", solution.complexity_space);
+    // println!("Time Complexity:  {}", solution.complexity_time);
+    // println!("Number of moves required: {}", solution.number_of_moves_required);
 }
