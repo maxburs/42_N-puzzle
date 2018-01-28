@@ -81,11 +81,11 @@ pub fn from_raw(raw: &str) -> Result<Puzzle, String> {
         })
         .collect();
     
-    return from_data(data);
+    return from_data(data, size);
 }
 
-pub fn from_data(data: Vec<Vec<u32>>) -> Result<Puzzle, String> {
-    validate(&data, data.len())?;
+pub fn from_data(data: Vec<Vec<u32>>, size: usize) -> Result<Puzzle, String> {
+    validate(&data, size)?;
 
     let (x, y) = find_center(&data)?;
 

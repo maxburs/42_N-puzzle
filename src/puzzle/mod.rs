@@ -5,19 +5,33 @@ mod generate_final;
 
 pub use self::parse::from_raw;
 
+#[derive(Clone, Eq, PartialEq, Hash)]
 pub struct Puzzle {
     data: Vec<Vec<u32>>,
     x: usize,
     y: usize,
 }
 
-pub fn target_of_size(size: usize) -> Result<Puzzle, String> {
-    parse::from_data(generate_final::generate_final(size))
+pub fn target_of(puzzle: &Puzzle) -> Puzzle {
+    let size = puzzle.data.len();
+
+    match parse::from_data(generate_final::generate_final(size), size) {
+        Ok(puz) => puz,
+        Err(err) => panic!(format!(
+            "Bug or invalid puzzle size, error: {}", err
+        ))
+    }
 }
 
 impl fmt::Display for Puzzle {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-       write!(f, "{:?}", self.data)
+        for line in self.data.iter() {
+            for n in line.iter() {
+                write!(f, "{} ", n)?;
+            }
+            write!(f, "\n")?;
+        };
+        Ok(())
     }
 }
 
@@ -55,5 +69,4 @@ impl Puzzle {
         Puzzle { data, x, y, }
     }
 }
-
 

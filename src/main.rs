@@ -27,7 +27,7 @@ fn main() {
         }
     };
 
-    let puzzle = match puzzle::from_raw(&raw) {
+    let puz = match puzzle::from_raw(&raw) {
         Ok(file) => file,
         Err(e) => {
             println!("{}",e);
@@ -35,16 +35,14 @@ fn main() {
         }
     };
 
-    println!("lines: {}", puzzle);
+    println!("lines:\n{}", puz);
 
-    // let solution = if let Some(solution) = puzzle.solve() {
-    //     solution
-    // } else {
-    //     println!("No solution found");
-    //     return;
-    // };
+    let solution = if let Some(solution) = a_star::solve(&puz, &puzzle::target_of(&puz)) {
+        solution
+    } else {
+        println!("No solution found");
+        return;
+    };
     
-    // println!("Space complexity: {}", solution.complexity_space);
-    // println!("Time Complexity:  {}", solution.complexity_time);
-    // println!("Number of moves required: {}", solution.number_of_moves_required);
+    println!("{}", solution);
 }

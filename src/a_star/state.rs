@@ -1,11 +1,11 @@
 use std::rc::Rc;
 use std::cell::RefCell;
 use std::hash::Hash;
-// use std::fmt;
+
 use super::Expandable;
 
-#[derive(Clone, Debug, Eq, PartialEq)]
-pub struct State<T: Expandable/* + Clone + Eq*/ + Hash> {
+#[derive(Clone, Eq, PartialEq)]
+pub struct State<T: Expandable + Hash> {
     pub data: T,
     pub previous: Option<Rc<RefCell<State<T>>>>,
     pub distance: usize,
@@ -16,7 +16,7 @@ pub fn new<T: Expandable + Hash>(data: T, distance: usize) -> State<T> {
     State {
         data,
         previous: None,
-        distance: 0,
+        distance,
         open: true,
     }
 }
@@ -37,18 +37,6 @@ impl<T: Expandable + Hash> Expandable for State<T> {
             .collect()
     }
 }
-
-// impl fmt::Display for State {
-//     fn fmt(&self, f: & mut fmt::Formatter) -> fmt::Result {
-//         for line in self.data.iter() {
-//             for n in line.iter() {
-//                 write!(f, "{} ", n)?;
-//             }
-//             write!(f, "\n")?;
-//         };
-//         Ok(())
-//     }
-// }
 
 // #[test]
 // fn test_expand() {
