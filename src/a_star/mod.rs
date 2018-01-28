@@ -3,6 +3,7 @@ use std::rc::Rc;
 use std::cell::RefCell;
 use std::mem;
 use std::marker;
+use std::hash::Hash;
 
 mod state;
 
@@ -10,7 +11,7 @@ pub trait Expandable: marker::Sized {
     fn expand(&self) -> Vec<Self>;
 }
 
-pub struct Solution<T: Expandable> {
+pub struct Solution<T> {
     // Total number of states ever selected in the "opened" set (complexity in time).
     pub complexity_time: usize,
     // Maximum number of states ever represented in memory at the same time
@@ -22,9 +23,10 @@ pub struct Solution<T: Expandable> {
     pub number_of_moves_required: usize,
 }
 
-pub fn solve<T: Expandable>(puzzle: &T, target: &T) -> Option<Solution<T>> {
+pub fn solve<T: Expandable + Clone + Eq + Hash
+    >(puzzle: &T, target: &T) -> Option<Solution<T>> {
     // todo: use unsafe code instead of reference counting
-    let start = Rc::new(RefCell::new(state::new(puzzle.data.clone(), 0)));
+    let start = Rc::new(RefCell::new(state::new(puzzle.clone(), 0)));
 
     // open_rank stores the open states sorted by ranking
     let mut open_rank = Vec::new();
@@ -49,7 +51,7 @@ pub fn solve<T: Expandable>(puzzle: &T, target: &T) -> Option<Solution<T>> {
 
         let e = e_cell.borrow();
 
-        if e.data == target {
+        if e.data == *target {
             let sequence_of_states: Vec<T> = {
 
                 let mut sequence_of_states = vec![];

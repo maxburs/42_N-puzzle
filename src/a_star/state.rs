@@ -1,17 +1,18 @@
 use std::rc::Rc;
 use std::cell::RefCell;
+use std::hash::Hash;
 // use std::fmt;
 use super::Expandable;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub struct State<T: Expandable> {
+pub struct State<T: Expandable/* + Clone + Eq*/ + Hash> {
     pub data: T,
     pub previous: Option<Rc<RefCell<State<T>>>>,
     pub distance: usize,
     pub open: bool,
 }
 
-pub fn new<T: Expandable>(data: T, distance: usize) -> State<T> {
+pub fn new<T: Expandable + Hash>(data: T, distance: usize) -> State<T> {
     State {
         data,
         previous: None,
@@ -20,7 +21,7 @@ pub fn new<T: Expandable>(data: T, distance: usize) -> State<T> {
     }
 }
 
-impl<T: Expandable> Expandable for State<T> {
+impl<T: Expandable + Hash> Expandable for State<T> {
     fn expand(&self) -> Vec<Self> {
         self.data
             .expand()
